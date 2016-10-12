@@ -21,6 +21,7 @@
    #:member-p
    #:create
    #:update
+   #:transaction
    #:dump
    #:write))
 
@@ -47,6 +48,7 @@
 (defgeneric member-p (article store))
 (defgeneric create (article store))
 (defgeneric update (article store))
+(defgeneric transaction (function store))
 
 (defclass dump ()
   ())

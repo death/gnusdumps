@@ -6,7 +6,8 @@
   (:use #:cl #:gnusdumps/protocols #:gnusdumps/store/standard)
   (:shadowing-import-from #:gnusdumps/protocols #:open #:close #:write)
   (:import-from #:sqlite #:execute-non-query #:execute-to-list
-                #:last-insert-rowid #:connect #:disconnect)
+                #:last-insert-rowid #:connect #:disconnect
+                #:with-transaction)
   (:export
    #:sqlite-store
    #:file-name
@@ -88,3 +89,8 @@
   (assert (integerp (id article)))
   (run-statement store :update (digest article) (id article))
   (values (member-p article store)))
+
+(defmethod transaction ((function function) (store sqlite-store))
+  (with-slots (handle) store
+    (with-transaction handle
+      (funcall function))))

@@ -22,18 +22,19 @@
 
 (defmethod write ((article article) (store store) (dump standard-dump))
   (with-open-objects (store dump)
-    (multiple-value-bind (exists modified) (member-p article store)
-      (cond ((not exists)
-             (write-using-file-number article
-                                      (create article store)
-                                      dump))
-            ((not modified))
-            (t
-             (write-using-file-number article
-                                      (update article store)
-                                      dump))))))
+    (transaction (lambda () (write-no-tx article store dump)) store)))
 
 (defmethod write ((articles list) (store store) (dump standard-dump))
   (with-open-objects (store dump)
-    (dolist (article articles)
-      (write article store dump))))
+    (transaction (lambda ()
+                   (dolist (article articles)
+                     (write-no-tx article store dump)))
+                 store)))
+
+(defun write-no-tx (article store dump)
+  (multiple-value-bind (exists modified) (member-p article store)
+    (cond ((not exists)
+           (write-using-file-number article (create article store) dump))
+          ((not modified))
+          (t
+           (write-using-file-number article (update article store) dump)))))

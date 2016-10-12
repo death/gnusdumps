@@ -5,6 +5,7 @@
 (defpackage #:gnusdumps/store/transient
   (:use #:cl #:gnusdumps/protocols #:gnusdumps/store/standard)
   (:shadowing-import-from #:gnusdumps/protocols #:open #:close #:write)
+  (:import-from #:alexandria #:copy-hash-table)
   (:export
    #:transient-store))
 
@@ -55,3 +56,16 @@
     (let ((entry (gethash (id article) table)))
       (setf (digest entry) (copy-seq (digest article)))
       (file-number entry))))
+
+(defmethod transaction ((function function) (store transient-store))
+  (with-slots (table file-number-counter) store
+    (let ((previous-table table)
+          (previous-file-number-counter file-number-counter)
+          (ok nil))
+      (setf table (copy-hash-table table))
+      (unwind-protect
+           (multiple-value-prog1 (funcall function)
+             (setf ok t))
+        (unless ok
+          (setf table previous-table)
+          (setf file-number-counter previous-file-number-counter))))))
