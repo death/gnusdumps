@@ -21,7 +21,6 @@
    #:member-p
    #:create
    #:update
-   #:need-update
    #:dump
    #:write))
 
@@ -48,7 +47,6 @@
 (defgeneric member-p (article store))
 (defgeneric create (article store))
 (defgeneric update (article store))
-(defgeneric need-update (article store))
 
 (defclass dump ()
   ())

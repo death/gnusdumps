@@ -23,15 +23,15 @@
 (defmethod write ((article article) (store store) (dump standard-dump))
   (with-open-objects (store dump)
     (multiple-value-bind (exists modified) (member-p article store)
-      (when (or (not exists) modified)
-        (let ((file-number (if exists
-                               (update article store)
-                               (create article store))))
-          (handler-case
-              (write-using-file-number article file-number dump)
-            (error (e)
-              (need-update article store)
-              (error e))))))))
+      (cond ((not exists)
+             (write-using-file-number article
+                                      (create article store)
+                                      dump))
+            ((not modified))
+            (t
+             (write-using-file-number article
+                                      (update article store)
+                                      dump))))))
 
 (defmethod write ((articles list) (store store) (dump standard-dump))
   (with-open-objects (store dump)

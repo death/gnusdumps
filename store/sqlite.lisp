@@ -88,8 +88,3 @@
   (assert (integerp (id article)))
   (run-statement store :update (digest article) (id article))
   (values (member-p article store)))
-
-(defmethod need-update ((article article) (store sqlite-store))
-  (assert (integerp (id article)))
-  (run-statement store :update (fill (digest article) 0) (id article))
-  (values))
