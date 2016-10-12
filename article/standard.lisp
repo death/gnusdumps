@@ -25,32 +25,33 @@
 
 (defmethod digest ((article standard-article))
   (with-slots (digest-cache) article
-    (or digest-cache
-        (setf digest-cache
-              (let ((stream (make-digesting-stream :sha256)))
-                (labels ((add (x)
-                           (etypecase x
-                             (string
-                              (write-byte 0 stream)
-                              (add (string-to-octets x)))
-                             (integer
-                              (check-type x (unsigned-byte 64))
-                              (write-byte 1 stream)
-                              (do ((i 0 (+ i 8)))
-                                  ((= i 64))
-                                (write-byte (ldb (byte 8 i) x) stream)))
-                             (simple-array
-                              (write-byte 2 stream)
-                              (write-sequence x stream))
-                             (null
-                              (write-byte 3 stream))
-                             (timestamp
-                              (write-byte 4 stream)
-                              (add (timestamp-to-universal x))))))
-                  (add (id article))
-                  (add (parent-id article))
-                  (add (author article))
-                  (add (subject article))
-                  (add (body article))
-                  (add (date article)))
-                (produce-digest stream))))))
+    (copy-seq
+     (or digest-cache
+         (setf digest-cache
+               (let ((stream (make-digesting-stream :sha256)))
+                 (labels ((add (x)
+                            (etypecase x
+                              (string
+                               (write-byte 0 stream)
+                               (add (string-to-octets x)))
+                              (integer
+                               (check-type x (unsigned-byte 64))
+                               (write-byte 1 stream)
+                               (do ((i 0 (+ i 8)))
+                                   ((= i 64))
+                                 (write-byte (ldb (byte 8 i) x) stream)))
+                              (simple-array
+                               (write-byte 2 stream)
+                               (write-sequence x stream))
+                              (null
+                               (write-byte 3 stream))
+                              (timestamp
+                               (write-byte 4 stream)
+                               (add (timestamp-to-universal x))))))
+                   (add (id article))
+                   (add (parent-id article))
+                   (add (author article))
+                   (add (subject article))
+                   (add (body article))
+                   (add (date article)))
+                 (produce-digest stream)))))))

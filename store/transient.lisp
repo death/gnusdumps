@@ -50,8 +50,14 @@
       file-number)))
 
 (defmethod update ((article article) (store transient-store))
+  (set-digest article (digest article) store))
+
+(defmethod need-update ((article article) (store transient-store))
+  (set-digest article (fill (digest article) 0) store))
+
+(defun set-digest (article digest store)
   (assert (member-p article store))
   (with-slots (table) store
     (let ((entry (gethash (id article) table)))
-      (setf (digest entry) (copy-seq (digest article)))
+      (setf (digest entry) digest)
       (file-number entry))))
