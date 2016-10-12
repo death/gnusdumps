@@ -18,6 +18,10 @@
   ((base-directory :initarg :base-directory :reader base-directory)
    (name :initarg :name :reader name)))
 
+(defmethod open :after ((object nneething-dump))
+  (with-slots (base-directory) object
+    (ensure-directories-exist base-directory)))
+
 (defmethod reset ((object nneething-dump))
   (with-slots (base-directory) object
     (ensure-directories-exist base-directory)
