@@ -9,5 +9,6 @@
                  #:gnusdumps/article/standard
                  #:gnusdumps/store/standard
                  #:gnusdumps/store/transient
+                 #:gnusdumps/store/sqlite
                  #:gnusdumps/dump/standard
                  #:gnusdumps/dump/nneething))
