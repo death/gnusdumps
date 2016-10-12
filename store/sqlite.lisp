@@ -45,8 +45,8 @@
          (e "CREATE TABLE IF NOT EXISTS ~A (article_id INTEGER, article_digest BLOB)" table-name)
          (e "CREATE UNIQUE INDEX IF NOT EXISTS ~A_idx ON ~A (article_id)" table-name table-name))
         (:drop
-         (e "DROP TABLE IF EXISTS ~A" table-name)
-         (e "DROP INDEX IF EXISTS ~A_idx" table-name))))))
+         (e "DROP INDEX IF EXISTS ~A_idx" table-name)
+         (e "DROP TABLE IF EXISTS ~A" table-name))))))
 
 (defun prepare-statements (table-name)
   (let ((statements (make-hash-table)))
