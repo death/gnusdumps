@@ -5,8 +5,6 @@
 (defpackage #:gnusdumps/store/sqlite
   (:use #:cl #:gnusdumps/protocols #:gnusdumps/store/standard)
   (:shadowing-import-from #:gnusdumps/protocols #:open #:close #:write)
-  (:import-from #:alexandria #:with-gensyms)
-  (:import-from #:constantia #:outs)
   (:import-from #:sqlite #:execute-non-query #:execute-to-list
                 #:last-insert-rowid #:connect #:disconnect)
   (:export
