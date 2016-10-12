@@ -3,7 +3,7 @@
 ;;;; +----------------------------------------------------------------+
 
 (defpackage #:gnusdumps/dump/standard
-  (:use #:cl #:gnusdumps/protocols #:gnusdumps/convenience)
+  (:use #:cl #:gnusdumps/protocols #:gnusdumps/convenience #:gnusdumps/reopen-mixin)
   (:shadowing-import-from #:gnusdumps/protocols #:open #:close #:write)
   (:export
    #:standard-dump
@@ -11,7 +11,7 @@
 
 (in-package #:gnusdumps/dump/standard)
 
-(defclass standard-dump (dump)
+(defclass standard-dump (reopen-mixin dump)
   ())
 
 (defgeneric write-using-file-number (article file-number dump))
