@@ -25,3 +25,8 @@
       (decf counter)
       (when (zerop counter)
         (call-next-method)))))
+
+(defmethod reset :around ((object reopen-mixin))
+  (open object)
+  (unwind-protect (call-next-method)
+    (close object)))
