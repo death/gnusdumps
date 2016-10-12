@@ -23,6 +23,12 @@
    (digest-cache :initform nil))
   (:default-initargs :parent-id nil))
 
+(defmethod print-object ((object standard-article) stream)
+  (print-unreadable-object (object stream :type t)
+    (with-slots (id) object
+      (format stream "id:~A" id)))
+  object)
+
 (defmethod digest ((article standard-article))
   (with-slots (digest-cache) article
     (or digest-cache
