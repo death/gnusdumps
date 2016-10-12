@@ -6,31 +6,24 @@
   (:use #:cl #:gnusdumps/protocols #:gnusdumps/store/standard)
   (:shadowing-import-from #:gnusdumps/protocols #:open #:close #:write)
   (:import-from #:sqlite #:execute-non-query #:execute-to-list
-                #:last-insert-rowid #:connect #:disconnect
-                #:with-transaction)
+                #:last-insert-rowid #:with-transaction)
   (:export
    #:sqlite-store
-   #:file-name
    #:table-name))
 
 (in-package #:gnusdumps/store/sqlite)
 
 (defclass sqlite-store (standard-store)
-  ((file-name :initarg :file-name :reader file-name)
-   (table-name :initarg :table-name :reader table-name)
-   (handle)
+  ((table-name :initarg :table-name :reader table-name)
+   (handle :initarg :handle)
    (statements)))
 
 (defmethod open ((object sqlite-store))
-  (with-slots (file-name table-name handle statements) object
-    (setf handle (connect file-name))
+  (with-slots (table-name handle statements) object
     (table-command object :create)
     (setf statements (prepare-statements table-name))))
 
-(defmethod close ((object sqlite-store))
-  (with-slots (handle) object
-    (disconnect handle)
-    (setf handle nil)))
+(defmethod close ((object sqlite-store)))
 
 (defmethod reset ((object sqlite-store))
   (table-command object :drop)
