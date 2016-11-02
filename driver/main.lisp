@@ -322,7 +322,7 @@ articles."))
     :documentation "A plist that will contain intermediate results."
     :reader intermediate-results))
   (:documentation "A mixin that stores intermediate results - document
-URLs, documents, and articles.")
+URLs, documents, and articles."))
 
 (defmethod leech :before ((context debugging-mixin))
   (with-slots (intermediate-results) context
