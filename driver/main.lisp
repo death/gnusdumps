@@ -199,7 +199,6 @@ NIL for an orphan."))
            (make-body)
            (make-date)))
 
-
 ;; MAKE-PARENT-ID
 
 (defmethod make-parent-id ((context context) document)
