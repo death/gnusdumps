@@ -4,7 +4,7 @@
 
 ;; The style of this program is a bit weird, but I like it :)
 ;;
-;; Subclasses of CONTEXT have to implement methods for these generic
+;; Subclassers of CONTEXT have to implement methods for these generic
 ;; functions:
 ;;
 ;; - FETCH-DOCUMENT-URLS
