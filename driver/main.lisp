@@ -96,6 +96,18 @@ that allows skipping it in case of an error."
              bad-entry))
       (remove bad-entry (apply #'mapcar #'process list more-lists)))))
 
+(defun read-new-value ()
+  "Read and evaluate a new value of something."
+  (format t "Enter a new value: ")
+  (force-output)
+  (multiple-value-list (eval (read))))
+
+(defmacro metalist (lambda-list docstring form list)
+  "Macroexpand and evaluate for each argument list in LIST."
+  (let ((name (gensym)))
+    `(macrolet ((,name ,lambda-list ,docstring ,form))
+       ,@(mapcar (lambda (arglist) `(,name ,@arglist)) list))))
+
 ;; LEECH
 
 (defgeneric fetch-document-urls (context)
@@ -169,6 +181,24 @@ NIL for an orphan."))
                  :subject (make-subject context document)
                  :date (make-date context document)
                  :body (make-body context document)))
+
+(metalist (name)
+          "Set up a USE-VALUE restart around MAKE-XXX functions."
+          `(defmethod ,name :around ((context context) document)
+             (declare (ignore document))
+             (restart-case
+                 (call-next-method)
+               (use-value (new-value)
+                 :report ,(format nil "Return a new value from ~S." name)
+                 :interactive read-new-value
+                 new-value)))
+          ((make-id)
+           (make-parent-id)
+           (make-author)
+           (make-subject)
+           (make-body)
+           (make-date)))
+
 
 ;; MAKE-PARENT-ID
 
