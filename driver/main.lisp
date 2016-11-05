@@ -36,7 +36,7 @@
    #:documents-to-articles
    #:dump-articles)
   (:export
-   #:fetch-documents)
+   #:fetch-document)
   (:export
    #:document-to-article)
   (:export
