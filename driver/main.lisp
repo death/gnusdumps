@@ -38,7 +38,9 @@
    #:documents-to-articles
    #:dump-articles)
   (:export
-   #:fetch-document)
+   #:fetch-document
+   #:sourced-document
+   #:document-url)
   (:export
    #:document-to-article)
   (:export
@@ -140,8 +142,15 @@ download."))
 
 ;; FETCH-DOCUMENT
 
+(defgeneric document-url (document)
+  (:documentation "Return the URL associated with the document."))
+
+;; Ugh, why doesn't HTML5-PARSER export DOCUMENT?
+(defclass sourced-document (html5-parser::document)
+  ((url :initarg :url :reader document-url)))
+
 (defmethod fetch-document ((context context) url)
-  (parse-html5 (dex:get url)))
+  (change-class (parse-html5 (dex:get url)) 'sourced-document :url url))
 
 ;; DOCUMENTS-TO-ARTICLES
 
