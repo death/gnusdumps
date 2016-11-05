@@ -4,6 +4,8 @@
 
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-USER; Base: 10 -*-
 
+(asdf:register-system-packages :cxml '(:cxml-xmls))
+
 (asdf:defsystem #:gnusdumps
   :description "Create article dumps for reading with GNUS"
   :author "death <github.com/death>"
