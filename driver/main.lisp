@@ -15,6 +15,8 @@
 ;;
 ;; - MAKE-BODY
 ;;
+;; - DUMP-ARTICLES (but see NNEETHING-DUMP-MIXIN)
+;;
 ;; The rest have default implementations that can be overriden.
 ;;
 ;; There are also a bunch of useful mixins.
@@ -47,11 +49,6 @@
    #:make-body
    #:make-date)
   (:export
-   #:store-filename
-   #:store-table-name
-   #:dump-output-directory
-   #:dump-name)
-  (:export
    #:sleep-policy-mixin
    #:fetch-document-seconds)
   (:export
@@ -60,7 +57,13 @@
    #:id-generation-mixin)
   (:export
    #:debugging-mixin
-   #:intermediate-results))
+   #:intermediate-results)
+  (:export
+   #:nneething-dump-mixin
+   #:store-filename
+   #:store-table-name
+   #:dump-output-directory
+   #:dump-name))
 
 (in-package #:gnusdumps/driver/main)
 
@@ -71,11 +74,7 @@
   ((name
     :initarg :name
     :reader name
-    :documentation "The context's name; used to derive other names.")
-   (base-directory
-    :initarg :base-directory
-    :reader base-directory
-    :documentation "Base directory for storage.")))
+    :documentation "The context's name; used to derive other names.")))
 
 (defgeneric leech (context)
   (:documentation "Fetch documents, convert to articles, and dump."))
@@ -218,59 +217,6 @@ NIL for an orphan."))
   (declare (ignore document))
   nil)
 
-;; DUMP-ARTICLES
-
-(defgeneric store-filename (context)
-  (:documentation "Construct a store filename."))
-
-(defgeneric store-table-name (context)
-  (:documentation "Construct a store table name."))
-
-(defgeneric dump-output-directory (context)
-  (:documentation "Construct a dump output directory pathname."))
-
-(defgeneric dump-name (context)
-  (:documentation "Construct a dump name."))
-
-(defmethod dump-articles ((context context) articles)
-  (let ((store-filename (store-filename context)))
-    (ensure-directories-exist store-filename)
-    (with-open-database (db store-filename)
-      (gnusdumps:write articles
-                       (make-instance 'gnusdumps:sqlite-store
-                                      :handle db
-                                      :table-name (store-table-name context))
-                       (make-instance 'gnusdumps:nneething-dump
-                                      :name (dump-name context)
-                                      :base-directory (dump-output-directory context))))))
-
-;; STORE-FILENAME
-
-(defmethod store-filename ((context context))
-  (with-slots (base-directory name) context
-    (make-pathname :name "store"
-                   :type "db"
-                   :defaults base-directory)))
-
-;; STORE-TABLE-NAME
-
-(defmethod store-table-name ((context context))
-  (with-slots (name) context
-    name))
-
-;; DUMP-OUTPUT-DIRECTORY
-
-(defmethod dump-output-directory ((context context))
-  (with-slots (base-directory) context
-    (merge-pathnames (make-pathname :directory '(:relative "dump"))
-                     base-directory)))
-
-;; DUMP-NAME
-
-(defmethod dump-name ((context context))
-  (with-slots (name) context
-    name))
-
 
 ;;;; Sleep policy mixin
 
@@ -339,3 +285,57 @@ URLs, documents, and articles."))
 (defmethod dump-articles :before ((context debugging-mixin) articles)
   (with-slots (intermediate-results) context
     (setf (getf intermediate-results :articles) articles)))
+
+
+;;;; nneething Dump mixin with an SQLite store
+
+(defclass nneething-dump-mixin ()
+  ((base-directory
+    :initarg :base-directory
+    :reader base-directory
+    :documentation "Base directory for storage."))
+  (:documentation "nneething Dump mixin with an SQLite store."))
+
+(defgeneric dump-output-directory (context)
+  (:documentation "Construct a dump output directory pathname."))
+
+(defgeneric dump-name (context)
+  (:documentation "Construct a dump name."))
+
+(defgeneric store-filename (context)
+  (:documentation "Construct a store filename."))
+
+(defgeneric store-table-name (context)
+  (:documentation "Construct a store table name."))
+
+(defmethod dump-articles ((context nneething-dump-mixin) articles)
+  (let ((store-filename (store-filename context)))
+    (ensure-directories-exist store-filename)
+    (ensure-directories-exist (dump-output-directory context))
+    (with-open-database (db store-filename)
+      (gnusdumps:write articles
+                       (make-instance 'gnusdumps:sqlite-store
+                                      :handle db
+                                      :table-name (store-table-name context))
+                       (make-instance 'gnusdumps:nneething-dump
+                                      :name (dump-name context)
+                                      :base-directory (dump-output-directory context))))))
+
+(defmethod dump-output-directory ((context nneething-dump-mixin))
+  (with-slots (base-directory) context
+    (merge-pathnames (make-pathname :directory '(:relative "dump"))
+                     base-directory)))
+
+(defmethod dump-name ((context nneething-dump-mixin))
+  (with-slots (name) context
+    name))
+
+(defmethod store-filename ((context nneething-dump-mixin))
+  (with-slots (base-directory name) context
+    (make-pathname :name "store"
+                   :type "db"
+                   :defaults base-directory)))
+
+(defmethod store-table-name ((context nneething-dump-mixin))
+  (with-slots (name) context
+    name))
