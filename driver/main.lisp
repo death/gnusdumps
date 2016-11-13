@@ -88,7 +88,11 @@
 
 (defun robust-mapcar (function list &rest more-lists)
   "Like MAPCAR, but for each set of elements have a CONTINUE restart
-that allows skipping it in case of an error."
+that allows skipping it in case of an error.
+
+Unlike MAPCAR, the resulting list is not guaranteed to have the same
+number of elements as the shortest input list, so the function is
+currently misnamed."
   (let ((bad-entry (cons nil nil)))
     (flet ((process (&rest items)
              (with-simple-restart (continue "Skip it")
