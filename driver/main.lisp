@@ -27,7 +27,7 @@
   (:import-from #:gnusdumps)
   (:import-from #:log4cl)
   (:import-from #:dexador)
-  (:import-from #:html5-parser #:parse-html5 #:element-attribute)
+  (:import-from #:html5-parser #:parse-html5)
   (:import-from #:sqlite #:with-open-database)
   (:export
    #:context
