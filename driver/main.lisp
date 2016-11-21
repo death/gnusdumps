@@ -65,7 +65,10 @@
    #:store-filename
    #:store-table-name
    #:dump-output-directory
-   #:dump-name))
+   #:dump-name)
+  (:export
+   #:max-documents-mixin
+   #:max-documents-limit))
 
 (in-package #:gnusdumps/driver/main)
 
@@ -352,3 +355,18 @@ URLs, documents, and articles."))
 (defmethod store-table-name ((context nneething-dump-mixin))
   (with-slots (name) context
     name))
+
+
+;;;; A mixin to limit the number of documents to fetch.
+
+(defclass max-documents-mixin ()
+  ((limit :initarg :max-documents-limit :reader max-documents-limit))
+  (:default-initargs :max-documents-limit 5)
+  (:documentation "A mixin to limit the number of documents to
+fetch (5 by default)."))
+
+(defmethod fetch-document-urls :around ((context max-documents-mixin))
+  (let ((urls (call-next-method)))
+    (if (> (length urls) (max-documents-limit context))
+        (subseq urls 0 (max-documents-limit context))
+        urls)))
