@@ -89,6 +89,14 @@
 
 ;; Utilities
 
+(defun robust-subseq (sequence start &optional end)
+  "Like SUBSEQ, but handles out-of-range bounding index designators
+gracefully."
+  (let* ((length (length sequence))
+         (start (max 0 (min start length)))
+         (end (max 0 start (min length (or end length)))))
+    (subseq sequence start end)))
+
 (defun robust-mapcar (function list &rest more-lists)
   "Like MAPCAR, but for each set of elements have a CONTINUE restart
 that allows skipping it in case of an error.
@@ -366,7 +374,4 @@ URLs, documents, and articles."))
 fetch (5 by default)."))
 
 (defmethod fetch-document-urls :around ((context max-documents-mixin))
-  (let ((urls (call-next-method)))
-    (if (> (length urls) (max-documents-limit context))
-        (subseq urls 0 (max-documents-limit context))
-        urls)))
+  (robust-subseq (call-next-method) 0 (max-documents-limit context)))
